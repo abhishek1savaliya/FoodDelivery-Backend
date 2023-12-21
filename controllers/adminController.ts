@@ -16,9 +16,7 @@ export const createVendor = async (req: Request, res: Response, next: NextFuncti
     }
 
     const salt = await generateSalt()
-    const userPassword = await generatePassword(password,salt)
-
-
+    const userPassword = await generatePassword(password, salt)
 
     const createVendor = await Vendor.create({
         name: name,
@@ -41,10 +39,27 @@ export const createVendor = async (req: Request, res: Response, next: NextFuncti
 
 export const getVendors = async (req: Request, res: Response, next: NextFunction) => {
 
+    const vendors = await Vendor.find()
+
+    if (vendors != null) {
+        return res.json(vendors)
+    }
+
+    return res.json({ message: "vendors data not available" })
+
 }
 
 
 export const getVendorById = async (req: Request, res: Response, next: NextFunction) => {
 
+    const vendorId = req.params.id;
+
+    const vandor = await Vendor.findById(vendorId)
+
+    if (vandor != null) {
+        return res.json(vandor)
+    }
+
+    return res.json({ message: "vendor not available" })
 }
 
