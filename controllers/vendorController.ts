@@ -4,6 +4,8 @@ import { findVendor } from "./adminController";
 import { genrateSignature, validatePassword } from "../utility";
 import { createFoodInput } from '../dto/food.dto';
 import { Food } from "../models/food";
+import express from 'express';
+import multer from 'multer';
 
 export const vendorLogin = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -69,6 +71,30 @@ export const updateVendorProfile = async (req: Request, res: Response, next: Nex
     return res.json({ message: "vendor not found" })
 }
 
+export const updateVendorCoverImage = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (user) {
+        
+        const vendor = await findVendor(user._id)
+
+        if (vendor !== null) {
+
+            const files = req.files as [Express.Multer.File]
+
+            const images = files.map((file: Express.Multer.File) => file.filename)
+
+            vendor.coverImages.push(...images)
+
+            const result = await vendor.save()
+
+            return res.json(result)
+        }
+    }
+
+    return res.json({ message: "Something went wrong with food" })
+}
+
 
 export const updateVendorService = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -100,6 +126,10 @@ export const addFood = async (req: Request, res: Response, next: NextFunction) =
 
         const vendor = await findVendor(user._id)
 
+        const files = req.files as [Express.Multer.File]
+
+        const images = files.map((file: Express.Multer.File) => file.filename)
+
         if (vendor !== null) {
             const createFood = await Food.create({
                 vendorId: vendor.id,
@@ -107,7 +137,7 @@ export const addFood = async (req: Request, res: Response, next: NextFunction) =
                 description: description,
                 category: category,
                 foodType: foodType,
-                images: ['sfgvfdg'],
+                images: images,
                 readyTime: readyTime,
                 price: price,
                 rating: 0
@@ -131,7 +161,7 @@ export const getFood = async (req: Request, res: Response, next: NextFunction) =
 
         const foods = await Food.find({ vendorId: user._id })
 
-        if(foods !==null){
+        if (foods !== null) {
             return res.json(foods)
         }
 
